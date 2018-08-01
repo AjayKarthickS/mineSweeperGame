@@ -1,0 +1,23 @@
+package mineSweeperGame;
+
+import java.util.Random;
+
+import javax.swing.JFrame;
+
+public class SweeperBoard extends JFrame{
+	int spacing = 9;
+	int neighs = 0;
+	public int mx = -100;
+	public int my = -100;
+	
+	Random rand = new Random();
+	
+	int[][] mines = new int[16][9];
+	int[][] neighbours = new int[16][9];
+	boolean[][] revealed = new boolean[16][9];
+	
+	public public SweeperBoard() {
+		
+	}
+	
+}

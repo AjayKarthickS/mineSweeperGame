@@ -1,0 +1,149 @@
+package mineSweeperGame;
+
+import java.util.ArrayDeque;
+import java.util.Random;;
+
+public class SweeperBoard {
+	char[][] board;
+	char[][] shadowBoard;
+	int numberOfMines;
+	int[][] mines;
+	int movesLeft;
+	
+	public SweeperBoard(){}
+	
+	public SweeperBoard(int numberOfRows, int numberOfCols, int numberOfMines){
+		board = new char[numberOfRows][numberOfCols];
+		shadowBoard = new char[numberOfRows][numberOfCols];
+		this.numberOfMines = numberOfMines;
+		mines = new int[numberOfMines][2];
+		movesLeft = (board.length*board.length) - numberOfMines;
+	}
+	
+	public void initialize(){
+		for(int row = 0; row < board.length; row++){
+			for(int col = 0; col < board[row].length; col++){
+				board[row][col] = '_';
+				shadowBoard[row][col] = '0';
+			}
+		}
+	}
+	private void placeMines(int userInputX, int userInputY){
+		Random rand = new Random();
+		boolean[] mineflag = new boolean[board.length*board.length];
+		for(int i = 0; i<numberOfMines;){
+			int random = rand.nextInt(board.length*board.length);
+			int x = random / board.length;
+			int y = random % board.length;
+			
+			while(mineflag[random] != true && x != userInputX && y != userInputY){
+				mineflag[random] = true;
+				mines[i][0] = x;
+				mines[i][1] = y;
+				shadowBoard[x][y] = '*';
+				i++;
+			}
+		}
+	}
+	
+	public int playMineSweeperUtil(int userInputX, int userInputY){
+		if(!isValid(userInputX,userInputY))
+			return -1;
+		
+		if(movesLeft == (board.length*board.length) - numberOfMines){ // checks if this is user's first move
+			placeMines(userInputX,userInputY);
+			computeShadowBoard();
+		}
+		
+		if(shadowBoard[userInputX][userInputY] == '*'){
+			return 0;
+		}
+		if(board[userInputX][userInputY] == '_'){
+			if(shadowBoard[userInputX][userInputY] == '0'){
+				showAllAdjacentNonMineCells(userInputX,userInputY);
+			}
+			else{
+				board[userInputX][userInputY] = shadowBoard[userInputX][userInputY];
+			}
+			movesLeft--;
+		}
+		return 1;
+	}
+	
+	private void computeShadowBoard(){
+		for(int row = 0; row < board.length; row++){
+			for(int col = 0; col < board[row].length; col++){
+				if(shadowBoard[row][col] != '*'){
+					for(int i = row-1; i < row+2; i++){
+						for(int j = col-1; j < col+2; j++){
+							if(isValid(i,j) && shadowBoard[i][j] == '*')
+								shadowBoard[row][col]+= 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void showAllAdjacentNonMineCells(int row, int col){
+		ArrayDeque<int[]> toCheck = new ArrayDeque<int[]>();
+		board[row][col] = shadowBoard[row][col];
+		int[] coordinates = {row,col};
+		toCheck.add(coordinates);
+		while(!toCheck.isEmpty()){
+			int[] currentCoordinates = toCheck.remove();
+			int currentRow = currentCoordinates[0];
+			int currentCol = currentCoordinates[1];
+			
+			for(int i = currentRow-1; i < currentRow+2; i++){
+				for(int j = currentCol-1; j < currentCol+2; j++){
+					if(isValid(i, j) && shadowBoard[i][j] == '0' && board[i][j] == '_'){
+						board[i][j] = '0';
+						movesLeft--;
+						toCheck.add(new int[]{i,j});
+					}
+				}
+			}
+		}
+	}
+	public int getMovesLeft(){
+		return movesLeft;
+	}
+	
+	private boolean isValid(int row, int col){
+		if(row >= 0 && row < board.length && col >= 0 && col < board.length)
+			return true;
+		return false;
+	}
+	
+	public void printBoard(){
+		System.out.print("    ");
+		for(int i = 0; i < board.length; i++)
+			System.out.print(i+" ");
+		System.out.println();
+		for(int i = 0 ; i < board.length; i++){
+			System.out.print(i+"   ");
+			for(int j = 0; j < board.length; j++){
+				System.out.print(board[i][j]+" ");
+			}
+			System.out.println();
+		}
+		System.out.println("Moves:" + movesLeft);
+	}
+	public void printShadowBoard(){
+		System.out.print("    ");
+		for(int i = 0; i < shadowBoard.length; i++)
+			System.out.print(i+" ");
+		System.out.println();
+		for(int i = 0 ; i < shadowBoard.length; i++){
+			System.out.print(i+"   ");
+			for(int j = 0; j < shadowBoard.length; j++){
+				System.out.print(shadowBoard[i][j]+" ");
+			}
+			System.out.println();
+		}
+		System.out.println("Moves:" + movesLeft);
+	}
+	
+	
+}

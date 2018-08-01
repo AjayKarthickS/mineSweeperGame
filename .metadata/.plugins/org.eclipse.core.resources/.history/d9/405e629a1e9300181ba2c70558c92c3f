@@ -1,0 +1,7 @@
+package mineSweeperGame;
+
+import javax.swing.JFrame;
+
+public class SweeperBoard extends JFrame{
+
+}
